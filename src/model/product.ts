@@ -10,6 +10,7 @@ interface IProduct extends Document {
     quantity: number;
     discount: number;
     blocked: boolean;
+    category: string;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -24,6 +25,7 @@ const ProductSchema = new Schema({
     quantity: { type: Number, required: true },
     discount: { type: Number, default: 0 },
     blocked: { type: Boolean, default: false },
+    category: { type: String, ref: 'ProductCategory' }, 
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
 });

@@ -7,8 +7,7 @@ export const getAllUsers = async (req: Request, res: Response) => {
         const pageNumber = parseInt(page as string, 10)
         const limitNumber = parseInt(limit as string, 10)
         const searchString = search as string
-
-        const filter = searchString ? { username: new RegExp(searchString, 'i') } : {}
+        const filter = searchString ? { username: new RegExp(searchString, 'i') } : {};
         const totalUsers = await User.countDocuments(filter)
         const totalPages=Math.ceil(totalUsers/limitNumber)
         const users = await User.find(filter).limit(limitNumber);
