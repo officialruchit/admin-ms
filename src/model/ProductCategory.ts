@@ -13,7 +13,11 @@ const ProductCategorySchema: Schema<IProductCategory> = new Schema({
   name: { type: String, required: true },
   description: { type: String },
   createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
+  updatedAt: { type: Date, default: Date.now },
 });
 
-export default mongoose.model<IProductCategory>('ProductCategory', ProductCategorySchema,'ProductCategory');
+export default mongoose.model<IProductCategory>(
+  'ProductCategory',
+  ProductCategorySchema,
+  'ProductCategory',
+);

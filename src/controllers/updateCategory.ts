@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import ProductCategory from '../model/ProductCategory'; 
+import ProductCategory from '../model/ProductCategory';
 
 export const updateProductCategory = async (req: Request, res: Response) => {
   try {
@@ -8,7 +8,7 @@ export const updateProductCategory = async (req: Request, res: Response) => {
     const updatedCategory = await ProductCategory.findByIdAndUpdate(
       id,
       { name, description, updatedAt: new Date() },
-      { new: true }
+      { new: true },
     );
     if (!updatedCategory) {
       return res.status(404).json({ message: 'Category not found' });

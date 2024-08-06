@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import Admin from '../model/admin'
+import Admin from '../model/admin';
 
 export const loginAdmin = async (req: Request, res: Response) => {
   try {
@@ -17,7 +17,7 @@ export const loginAdmin = async (req: Request, res: Response) => {
     const token = jwt.sign(
       { adminId: admin.id, email: admin.email },
       process.env.JWT_SECRET!,
-      { expiresIn: '1h' }
+      { expiresIn: '1h' },
     );
 
     res.status(200).json({ token });

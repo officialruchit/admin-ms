@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import ProductCategory from '../model/ProductCategory'
+import ProductCategory from '../model/ProductCategory';
 
 export const deleteProductCategory = async (req: Request, res: Response) => {
   try {

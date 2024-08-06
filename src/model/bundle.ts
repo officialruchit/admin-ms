@@ -19,9 +19,13 @@ const BundleProductSchema: Schema<IBundleProduct> = new Schema({
   description: { type: String },
   products: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
   discount: { type: Number, default: 0 },
-  blocked: { type: Boolean, default: false }, 
+  blocked: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
+  updatedAt: { type: Date, default: Date.now },
 });
 
-export default mongoose.model<IBundleProduct>('BundleProduct', BundleProductSchema,'BundleProduct');
+export default mongoose.model<IBundleProduct>(
+  'BundleProduct',
+  BundleProductSchema,
+  'BundleProduct',
+);
