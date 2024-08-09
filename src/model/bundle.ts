@@ -2,7 +2,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 interface IBundleProduct extends Document {
   bundleId: string;
-  sellerId: string;
+  adminId: string;
   name: string;
   description: string;
   products: mongoose.Types.ObjectId[];
@@ -14,7 +14,7 @@ interface IBundleProduct extends Document {
 
 const BundleProductSchema: Schema<IBundleProduct> = new Schema({
   bundleId: { type: String, required: true, unique: true },
-  sellerId: { type: String, required: true },
+  adminId: { type: String, required: true },
   name: { type: String, required: true },
   description: { type: String },
   products: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
@@ -24,8 +24,9 @@ const BundleProductSchema: Schema<IBundleProduct> = new Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-export default mongoose.model<IBundleProduct>(
+const BundleProduct = mongoose.model<Document>(
   'BundleProduct',
   BundleProductSchema,
   'BundleProduct',
 );
+export { BundleProduct, IBundleProduct };

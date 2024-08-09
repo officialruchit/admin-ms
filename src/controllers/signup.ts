@@ -1,26 +1,35 @@
 import { Request, Response } from 'express';
-import Admin from '../model/admin';
 import bcrypt from 'bcrypt';
+import admin from '../model/admin';
 
-export const signUpAdmin = async (req: Request, res: Response) => {
+export const signup = async (req: Request, res: Response) => {
   try {
-    const { username, email, password } = req.body;
+    const {
+      username,
+      email,
+      password,
+      roles = ['user'],
+      isAdmin = false,
+    } = req.body;
 
-    // Check if the admin already exists
-    const existingAdmin = await Admin.findOne({ email });
-    if (existingAdmin) {
-      return res.status(400).json({ message: 'Admin already exists' });
+    const existingUser = await admin.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'User already exists' });
     }
+
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newAdmin = new Admin({
+
+    const newUser = new admin({
       username,
       email,
       password: hashedPassword,
+      roles,
+      isAdmin: roles.includes('admin') || isAdmin,
     });
 
-    await newAdmin.save();
+    await newUser.save();
 
-    res.status(201).json({ message: 'Admin created successfully' });
+    res.status(201).json({ message: 'User registered successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error });
   }

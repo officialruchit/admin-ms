@@ -1,19 +1,96 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
-interface IAdmin extends Document {
+interface ITwoFA {
+  enabled: boolean;
+  method: 'sms' | 'email' | 'authenticator';
+  secret?: string;
+  otp?: string;
+  otpExpiry?: Date;
+}
+
+interface IAddress {
+  line1?: string;
+  line2?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  zipCode?: string;
+}
+
+interface IProfile {
+  firstName: string;
+  lastName: string;
+  address: IAddress;
+}
+
+interface IUser extends Document {
   username: string;
   email: string;
+  phoneNumber?: string;
+  countryCode?: string;
   password: string;
+  twoFA: ITwoFA;
+  resetPasswordToken?: string;
+  resetPasswordExpiry?: Date;
+  roles: ('user' | 'seller' | 'admin')[];
+  isAdmin: boolean;
+  profile: IProfile;
+  emailVerified: boolean;
+  phoneVerified: boolean;
+  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const AdminSchema: Schema = new Schema({
+const TwoFASchema = new Schema({
+  enabled: { type: Boolean, default: false },
+  method: { type: String, enum: ['sms', 'email', 'authenticator'] },
+  secret: { type: String },
+  otp: { type: String },
+  otpExpiry: { type: Date },
+});
+
+const AddressSchema = new Schema({
+  line1: { type: String },
+  line2: { type: String },
+  city: { type: String },
+  state: { type: String },
+  country: { type: String },
+  zipCode: { type: String },
+});
+
+const ProfileSchema = new Schema({
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
+  address: AddressSchema,
+});
+
+const UserSchema = new Schema<IUser>({
   username: { type: String, required: true, unique: true },
-  email: { type: String, required: true, unique: true },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+  },
+  phoneNumber: { type: String },
+  countryCode: { type: String },
   password: { type: String, required: true },
+  twoFA: TwoFASchema,
+  resetPasswordToken: { type: String },
+  resetPasswordExpiry: { type: Date },
+  roles: {
+    type: [String],
+    enum: ['user', 'seller', 'admin'],
+    default: ['admin'],
+  },
+  isAdmin: { type: Boolean, default: false },
+  profile: ProfileSchema,
+  emailVerified: { type: Boolean, default: false },
+  phoneVerified: { type: Boolean, default: false },
+  isActive: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
 
-export default mongoose.model<IAdmin>('Admin', AdminSchema, 'Admin');
+export default mongoose.model<IUser>('admin', UserSchema, 'admin');
