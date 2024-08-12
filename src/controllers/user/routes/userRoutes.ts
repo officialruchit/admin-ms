@@ -1,0 +1,12 @@
+import express from 'express';
+import { blockUser } from '../controller/blockUser';
+import { unblockUser } from '../controller/unblockeuser';
+import { getAllUsers } from '../controller/getAllUserInfo';
+import { getUserInfo } from '../controller/getUserInfo';
+import { adminAuthMiddleware } from '../../../middleware/auth';
+const router = express.Router();
+router.get('/getUserInfo/:id', adminAuthMiddleware, getUserInfo);
+router.get('/getAllUsers', adminAuthMiddleware, getAllUsers);
+router.put('/blockUser/:id', adminAuthMiddleware, blockUser);
+router.put('/unblockUser/:id', adminAuthMiddleware, unblockUser);
+export default router;

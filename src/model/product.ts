@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
-interface IProduct extends Document {
+export interface IProduct extends Document {
   productId: string;
   adminId: string;
   name: string;
@@ -8,6 +8,7 @@ interface IProduct extends Document {
   price: number;
   quantity: number;
   discount: number;
+  discountedPrice: number;
   blocked: boolean;
   category: string;
   createdAt: Date;
@@ -23,11 +24,15 @@ const ProductSchema = new Schema<IProduct>({
   price: { type: Number, required: true },
   quantity: { type: Number, required: true },
   discount: { type: Number, default: 0 },
+  discountedPrice: { type: Number },
   blocked: { type: Boolean, default: false },
   category: { type: String, ref: 'ProductCategory' },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
 
-const Product = mongoose.model<Document>('Product', ProductSchema, 'Product');
-export default Product;
+export const Product = mongoose.model<Document>(
+  'Product',
+  ProductSchema,
+  'Product',
+);
