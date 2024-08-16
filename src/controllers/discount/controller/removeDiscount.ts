@@ -47,12 +47,10 @@ export const removeDiscount = async (req: Request, res: Response) => {
       return res.status(500).json({ message: 'Failed to remove discount' });
     }
 
-    res
-      .status(200)
-      .json({
-        message: 'Discount removed successfully',
-        product: updatedProduct,
-      });
+    res.status(200).json({
+      message: 'Discount removed successfully',
+      product: updatedProduct,
+    });
   } catch (err) {
     const error = err as Error;
     res.status(500).json({ message: 'Server error', error: error.message });
