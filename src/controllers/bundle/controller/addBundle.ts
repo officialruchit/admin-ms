@@ -10,20 +10,52 @@ import mongoose from 'mongoose';
  */
 export const createBundleProduct = async (req: Request, res: Response) => {
   try {
-    // Extract the admin from the request object (assuming it's set by middleware)
+    // Extract the sellerId from the request object (assuming it's set by middleware)
     const adminId = req.userId;
 
     // Destructure the required fields from the request body
-    const { bundleId, name, description, products, discount } = req.body;
+    const { name, description, products, discount } = req.body;
 
-    // Convert product IDs from strings to ObjectIds
-    const productObjectIds = products.map(
-      (productId: string) => new mongoose.Types.ObjectId(productId),
-    );
+    // Validate that the sellerId is present
+    if (!adminId) {
+      return res
+        .status(403)
+        .json({ message: 'Unauthorized access: Admin ID is missing' });
+    }
+
+    // Validate that all required fields are provided
+    if (!name) {
+      return res.status(400).json({ message: 'Name is required' });
+    }
+    if (!description) {
+      return res.status(400).json({ message: 'Description is required' });
+    }
+    if (!products || !Array.isArray(products) || products.length === 0) {
+      return res
+        .status(400)
+        .json({ message: 'At least one product is required' });
+    }
+    if (
+      discount &&
+      (typeof discount !== 'number' || discount < 0 || discount > 100)
+    ) {
+      return res
+        .status(400)
+        .json({ message: 'Discount must be a number between 0 and 100' });
+    }
+
+    // Validate product IDs to ensure they are valid ObjectIds
+    const productObjectIds = products.map((productId: string) => {
+      if (!mongoose.Types.ObjectId.isValid(productId)) {
+        return res
+          .status(400)
+          .json({ message: `Invalid product ID: ${productId}` });
+      }
+      return new mongoose.Types.ObjectId(productId);
+    });
 
     // Create a new BundleProduct instance with the provided data
     const bundleProduct = new BundleProduct({
-      bundleId,
       adminId,
       name,
       description,
@@ -38,6 +70,6 @@ export const createBundleProduct = async (req: Request, res: Response) => {
     res.status(201).json({ message: 'Bundle product created', bundleProduct });
   } catch (err) {
     const error = err as Error;
-    res.status(400).json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
 };

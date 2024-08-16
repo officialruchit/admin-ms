@@ -7,6 +7,12 @@ export const getMonthlyLoginReportByRole = async (
 ) => {
   try {
     const { year, month } = req.query;
+    const adminId = req.userId;
+    if (!adminId) {
+      return res
+        .status(403)
+        .json({ message: 'Unauthorized access: Admin ID is missing' });
+    }
 
     // Convert year and month to integers
     const targetYear = parseInt(year as string);

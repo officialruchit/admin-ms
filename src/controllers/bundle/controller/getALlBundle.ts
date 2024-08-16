@@ -3,11 +3,15 @@ import { BundleProduct } from '../../../model/bundle';
 export const getAllBundle = async (req: Request, res: Response) => {
   try {
     const { page = 1, limit = 10, search = '' } = req.query;
-
+    const adminId = req.userId;
     const pageNumber = parseInt(page as string, 10); // Parse page number as base-10 integer
     const limitNumber = parseInt(limit as string, 10); // Parse limit as base-10 integer
     const searchString = search as string;
-
+    if (!adminId) {
+      return res
+        .status(403)
+        .json({ message: 'Unauthorized access: Admin ID is missing' });
+    }
     // Create a search filter
     const searchFilter = searchString
       ? { name: new RegExp(searchString, 'i') }

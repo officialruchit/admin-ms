@@ -6,6 +6,12 @@ export const getWeeklyLoginReportByRole = async (
   res: Response,
 ) => {
   try {
+    const adminId = req.userId;
+    if (!adminId) {
+      return res
+        .status(403)
+        .json({ message: 'Unauthorized access: Admin ID is missing' });
+    }
     const today = new Date();
     const lastWeek = new Date(today);
     lastWeek.setDate(today.getDate() - 7);

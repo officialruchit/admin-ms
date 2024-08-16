@@ -4,6 +4,12 @@ import ProductCategory from '../../../model/ProductCategory';
 // Get all Product Categories
 export const getAllProductCategories = async (req: Request, res: Response) => {
   try {
+    const adminId = req.userId;
+    if (!adminId) {
+      return res
+        .status(403)
+        .json({ message: 'Unauthorized access: Admin ID is missing' });
+    }
     const { page = 1, limit = 10, search = '' } = req.query;
     const PageNumber = parseInt(page as string, 10);
     const limitNumber = parseInt(limit as string, 10);

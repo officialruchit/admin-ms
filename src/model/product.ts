@@ -7,8 +7,8 @@ export interface IProduct extends Document {
   description: string;
   price: number;
   quantity: number;
-  discount: number;
-  discountedPrice: number;
+  discount?: mongoose.Schema.Types.ObjectId;
+  discountedPrice?: number;
   blocked: boolean;
   category: string;
   createdAt: Date;
@@ -23,7 +23,7 @@ const ProductSchema = new Schema<IProduct>({
   description: { type: String },
   price: { type: Number, required: true },
   quantity: { type: Number, required: true },
-  discount: { type: Number, default: 0 },
+  discount: { type: mongoose.Schema.Types.ObjectId, ref: 'adminDiscount' },
   discountedPrice: { type: Number },
   blocked: { type: Boolean, default: false },
   category: { type: String, ref: 'ProductCategory' },

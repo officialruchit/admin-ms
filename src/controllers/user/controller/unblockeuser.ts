@@ -3,6 +3,12 @@ import User from '../../../model/user';
 
 export const unblockUser = async (req: Request, res: Response) => {
   try {
+    const adminId = req.userId;
+    if (!adminId) {
+      return res
+        .status(403)
+        .json({ message: 'Unauthorized access: Admin ID is missing' });
+    }
     const user = await User.findByIdAndUpdate(
       req.params.id,
       { isActive: true },

@@ -3,6 +3,12 @@ import { Product } from '../../../model/product';
 
 export const unblockProduct = async (req: Request, res: Response) => {
   try {
+    const adminId = req.userId;
+    if (!adminId) {
+      return res
+        .status(403)
+        .json({ message: 'Unauthorized access: Admin ID is missing' });
+    }
     const { id } = req.params;
     const product = await Product.findByIdAndUpdate(
       id,

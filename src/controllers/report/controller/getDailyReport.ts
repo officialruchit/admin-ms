@@ -6,6 +6,12 @@ export const getDailyLoginReportByRole = async (
   res: Response,
 ) => {
   try {
+    const adminId = req.userId;
+    if (!adminId) {
+      return res
+        .status(403)
+        .json({ message: 'Unauthorized access: Admin ID is missing' });
+    }
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 

@@ -1,7 +1,6 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 interface IBundleProduct extends Document {
-  bundleId: string;
   adminId: string;
   name: string;
   description: string;
@@ -13,7 +12,6 @@ interface IBundleProduct extends Document {
 }
 
 const BundleProductSchema: Schema<IBundleProduct> = new Schema({
-  bundleId: { type: String, required: true, unique: true },
   adminId: { type: String, required: true },
   name: { type: String, required: true },
   description: { type: String },

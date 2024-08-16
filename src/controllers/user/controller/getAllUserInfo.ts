@@ -3,6 +3,12 @@ import User from '../../../model/user';
 
 export const getAllUsers = async (req: Request, res: Response) => {
   try {
+    const adminId = req.userId;
+    if (!adminId) {
+      return res
+        .status(403)
+        .json({ message: 'Unauthorized access: Admin ID is missing' });
+    }
     const { page = 1, limit = 10, search = '' } = req.query;
     const pageNumber = parseInt(page as string, 10);
     const limitNumber = parseInt(limit as string, 10);
