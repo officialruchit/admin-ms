@@ -9,6 +9,7 @@ import reportRoutes from '../controllers/report/routes/report';
 import userRoutes from '../controllers/user/routes/userRoutes';
 import { signin } from '../controllers/signin';
 import { signup } from '../controllers/signup';
+import  SalesRoutes from '../controllers/sales/routes/salesRoutes'
 
 router.post('/signup', signup);
 router.post('/login', signin);
@@ -18,5 +19,6 @@ router.use('/', discountRoutes);
 router.use('/', productRoutes);
 router.use('/', reportRoutes);
 router.use('/', userRoutes);
+router.use('/',SalesRoutes)
 
 export default router;

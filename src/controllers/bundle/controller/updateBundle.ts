@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { BundleProduct } from '../../../model/bundle';
+import { BundleProduct, IBundleProduct } from '../../../model/bundle';
 import mongoose from 'mongoose';
 
 /**
@@ -14,84 +14,52 @@ export const updateBundle = async (req: Request, res: Response) => {
     const adminId = req.userId;
 
     // Extract the bundleId from the request parameters
-    const id = req.params.id;
+    const bundleId = req.params.id;
 
     // Destructure the fields to update from the request body
-    const { name, description, products, discount } = req.body;
+    const { name, description, discountPercentage } = req.body;
 
-    // Validate that the admin is present
-    if (!adminId) {
-      return res
-        .status(403)
-        .json({ message: 'Unauthorized access: Admin ID is missing' });
-    }
-
-    // Validate that the bundleId is a valid ObjectId
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+     // Validate bundle ID
+     if (!mongoose.Types.ObjectId.isValid(bundleId)) {
       return res.status(400).json({ message: 'Invalid bundle ID' });
     }
 
-    // Validate that at least one field is provided for updating
-    if (
-      !name &&
-      !description &&
-      (!products || products.length === 0) &&
-      discount === undefined
-    ) {
-      return res
-        .status(400)
-        .json({ message: 'At least one field must be provided to update' });
+     // Find the existing bundle product
+     const bundleProduct = await BundleProduct.findById(bundleId) as IBundleProduct;
+
+     if (!bundleProduct) {
+       return res.status(404).json({ message: 'Bundle product not found' });
+     }
+     
+    // Update the name if provided
+    if (name) {
+      bundleProduct.name = name;
     }
 
-    // If the discount is provided, validate it
-    if (
-      discount !== undefined &&
-      (typeof discount !== 'number' || discount < 0 || discount > 100)
-    ) {
-      return res
-        .status(400)
-        .json({ message: 'Discount must be a number between 0 and 100' });
+    // Update the description if provided
+    if (description) {
+      bundleProduct.description = description;
     }
 
-    // If products are provided, validate the product IDs to ensure they are valid ObjectIds
-    let productObjectIds;
-    if (products && Array.isArray(products)) {
-      productObjectIds = products.map((productId: string) => {
-        if (!mongoose.Types.ObjectId.isValid(productId)) {
-          return res
-            .status(400)
-            .json({ message: `Invalid product ID: ${productId}` });
-        }
-        return new mongoose.Types.ObjectId(productId);
-      });
+    // Update the discount percentage if provided and valid
+    if (discountPercentage !== undefined) {
+      if (typeof discountPercentage !== 'number' || discountPercentage < 0 || discountPercentage > 100) {
+        return res.status(400).json({ message: 'Discount must be a number between 0 and 100' });
+      }
+
+      bundleProduct.discountPercentage = discountPercentage;
+
+      // Calculate the discount price based on the updated discount percentage
+      const totalOriginalPrice = bundleProduct.totalPrice ?? 0;
+      bundleProduct.discountPrice = totalOriginalPrice * (1 - discountPercentage / 100);
     }
 
-    // Prepare the update data
-    const updateData: any = {};
-    if (name) updateData.name = name;
-    if (description) updateData.description = description;
-    if (products) updateData.products = productObjectIds;
-    if (discount !== undefined) updateData.discount = discount;
+    // Save the updated bundle product
+    await bundleProduct.save();
 
-    // Find and update the bundle product
-    const updatedBundleProduct = await BundleProduct.findByIdAndUpdate(
-      id,
-      updateData,
-      {
-        new: true,
-      },
-    );
-
-    // If the bundle product is not found, return a 404 error
-    if (!updatedBundleProduct) {
-      return res.status(404).json({ message: 'Bundle product not found' });
-    }
-
-    // Respond with the updated bundle product
-    res.status(200).json({
-      message: 'Bundle product updated successfully',
-      bundleProduct: updatedBundleProduct,
-    });
+    // Respond with a success message and the updated bundle product
+    res.status(200).json({ message: 'Bundle product updated', bundleProduct });
+  
   } catch (err) {
     const error = err as Error;
     res.status(500).json({ message: error.message });

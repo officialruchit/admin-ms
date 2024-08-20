@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { BundleProduct, IBundleProduct } from '../../../model/bundle';
 import mongoose from 'mongoose';
+import { IProduct, Product } from '../../../model/product';
 
 // Remove a product from a bundle
 export const removeProductFromBundle = async (req: Request, res: Response) => {
@@ -39,6 +40,16 @@ export const removeProductFromBundle = async (req: Request, res: Response) => {
 
     // Remove the product from the bundle
     bundle.products.splice(productIndex, 1);
+
+    const productsData: IProduct[] = await Product.find({ _id: { $in: bundle.products } });
+    const totalOriginalPrice = productsData.reduce((total, product) => total + product.price, 0);
+
+    bundle.totalPrice = totalOriginalPrice;
+
+    // Recalculate the discount price if a discount is applied
+    bundle.discountPrice = bundle.discountPercentage
+      ? totalOriginalPrice * (1 - bundle.discountPercentage / 100)
+      : totalOriginalPrice;
 
     // Ensure adminId is set (if needed)
     bundle.adminId = adminId;

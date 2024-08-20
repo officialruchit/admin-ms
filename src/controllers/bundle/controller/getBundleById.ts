@@ -17,7 +17,10 @@ export const getBundleById = async (req: Request, res: Response) => {
         .json({ message: 'Unauthorized access: Admin ID is missing' });
     }
     // Find the bundle by ID and populate associated products
-    const bundle = await BundleProduct.findById(id).populate('products');
+    const bundle = await BundleProduct.findById(id).populate({
+      path: 'products',
+      select: 'name description price quantity',
+    });
     if (!bundle) {
       return res.status(404).json({ message: 'Bundle not found' });
     }
