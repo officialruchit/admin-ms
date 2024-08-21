@@ -71,7 +71,7 @@ export const updateDiscount = async (req: Request, res: Response) => {
 
     // Update the discount with the provided data
     const updatedDiscount = await discount.findByIdAndUpdate(
-      id,
+      id, 
       {
         percentage,
         description,
