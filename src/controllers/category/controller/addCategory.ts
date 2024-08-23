@@ -33,7 +33,7 @@ export const createProductCategory = async (req: Request, res: Response) => {
     }
 
     // Create and save the new category
-    const newCategory = new ProductCategory({ name: name.trim(), description });
+    const newCategory = new ProductCategory({ categoryName: name.trim(), description });
     const savedCategory = await newCategory.save();
 
     res.status(201).json(savedCategory);

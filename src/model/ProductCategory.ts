@@ -1,7 +1,7 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 interface IProductCategory extends Document {
-  name: string;
+  categoryName: string;
   description: string;
   isActive: boolean;
   createdAt: Date;
@@ -9,7 +9,7 @@ interface IProductCategory extends Document {
 }
 
 const ProductCategorySchema: Schema<IProductCategory> = new Schema({
-  name: { type: String, required: true },
+  categoryName: { type: String, required: true },
   description: { type: String },
   isActive: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now },

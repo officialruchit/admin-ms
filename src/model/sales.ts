@@ -4,6 +4,8 @@ import { Schema, model, Document } from 'mongoose';
 export interface ISaleItem {
     itemId: Schema.Types.ObjectId;  // This can be either a Product or a Bundle ID
     itemType: 'Product' | 'Bundle'; // Define the type of item
+    originalPrice: number;
+    discountedPrice?: number;
 }
 
 // Interface for the Sales model
@@ -11,6 +13,8 @@ export interface ISales extends Document {
     name: string;
     validFrom: Date;
     validTo: Date;
+    discountPercentage: number;
+    isActive: boolean;
     items: ISaleItem[];
 }
 
@@ -25,6 +29,8 @@ const SaleItemSchema = new Schema<ISaleItem>({
         required: true,
         enum: ['Product', 'Bundle'], // Only allow 'Product' or 'Bundle'
     },
+    originalPrice: { type: Number, required: true },
+    discountedPrice: { type: Number }
 });
 
 // Schema for the Sales model
@@ -41,6 +47,8 @@ const SalesSchema = new Schema<ISales>({
         type: Date,
         required: true,
     },
+    discountPercentage: { type: Number, required: true },
+    isActive: { type: Boolean, default: false },
     items: [SaleItemSchema], // Array of sale items (products or bundles)
 }, {
     timestamps: true // Automatically adds createdAt and updatedAt fields

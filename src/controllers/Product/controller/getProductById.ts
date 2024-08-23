@@ -10,7 +10,10 @@ export const getAllProductsById = async (req: Request, res: Response) => {
         .status(403)
         .json({ message: 'Unauthorized access: Admin ID is missing' });
     }
-    const product = (await Product.findById(req.params.id)) as IProduct;
+    const product = (await Product.findById(req.params.id).populate({
+      path: 'category',
+      select: 'name description -_id',
+    })) as IProduct;
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }

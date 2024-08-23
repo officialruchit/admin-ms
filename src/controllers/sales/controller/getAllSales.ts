@@ -18,7 +18,7 @@ export const getAllSales = async (req: Request, res: Response) => {
 
         // Fetch sales with filters, pagination, and population
         const sales = await Sales.find(filter)
-            .populate('items.itemId')
+        .populate('items.itemId')
             .skip(skip)
             .limit(limitNumber);
 

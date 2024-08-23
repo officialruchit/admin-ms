@@ -9,7 +9,12 @@ export const getUserInfo = async (req: Request, res: Response) => {
         .status(403)
         .json({ message: 'Unauthorized access: Admin ID is missing' });
     }
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.params.id)
+    .select('-password -twoFA.otp -twoFA.otpExpiry')
+    .populate({ path: 'username' })
+    .populate('profile')
+    .populate('roles')
+    .populate('twoFA')
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }

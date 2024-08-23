@@ -12,7 +12,7 @@ routes.get('/getSaleDetails/:id',adminAuthMiddleware,getSaleDetails)
 routes.get('/getAllSales',adminAuthMiddleware,getAllSales)
 routes.post('/createSales',adminAuthMiddleware,createSales)
 routes.patch('/addProductToSale/:id',adminAuthMiddleware,addProductToSale)
-routes.patch('/removeProductFromSale/:id',adminAuthMiddleware,removeProductFromSale)
-routes.delete('/deleteSale/:id',adminAuthMiddleware,deleteSale)
+//routes.patch('/removeProductFromSale/:id',adminAuthMiddleware,removeProductFromSale)
+//routes.delete('/deleteSale/:id',adminAuthMiddleware,deleteSale)
 export default routes;
 

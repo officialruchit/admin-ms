@@ -5,7 +5,7 @@ import mongoose from 'mongoose';
 
 export const removeDiscount = async (req: Request, res: Response) => {
   try {
-    const productId = req.params.productId;
+    const productId = req.params.id;
     const adminId = req.userId;
 
     // Check if adminId is present

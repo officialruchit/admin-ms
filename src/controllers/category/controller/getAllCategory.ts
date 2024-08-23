@@ -14,7 +14,7 @@ export const getAllProductCategories = async (req: Request, res: Response) => {
     const PageNumber = parseInt(page as string, 10);
     const limitNumber = parseInt(limit as string, 10);
     const searchString = search as string;
-    const filter = searchString ? { name: new RegExp(searchString, 'i') } : {};
+    const filter = searchString ? { categoryName: new RegExp(searchString, 'i') } : {};
     const categories = await ProductCategory.find(filter).limit(limitNumber);
     const totalDocs = await ProductCategory.countDocuments(filter);
     const totalPage = Math.ceil(totalDocs / limitNumber);

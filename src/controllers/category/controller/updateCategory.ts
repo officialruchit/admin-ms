@@ -32,7 +32,7 @@ export const updateProductCategory = async (req: Request, res: Response) => {
     // Check if a category with the same name already exists (excluding the current category)
     if (name) {
       const existingCategory = await ProductCategory.findOne({
-        name: name.trim(),
+        categoryName: name.trim(),
         _id: { $ne: id }, // Exclude the current category from the check
       });
 
@@ -46,7 +46,7 @@ export const updateProductCategory = async (req: Request, res: Response) => {
     // Update the category
     const updatedCategory = await ProductCategory.findByIdAndUpdate(
       id,
-      { name: name?.trim(), description, updatedAt: new Date() },
+      { categoryName: name?.trim(), description, updatedAt: new Date() },
       { new: true },
     );
 
