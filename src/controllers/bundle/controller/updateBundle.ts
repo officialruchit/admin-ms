@@ -19,18 +19,20 @@ export const updateBundle = async (req: Request, res: Response) => {
     // Destructure the fields to update from the request body
     const { name, description, discountPercentage } = req.body;
 
-     // Validate bundle ID
-     if (!mongoose.Types.ObjectId.isValid(bundleId)) {
+    // Validate bundle ID
+    if (!mongoose.Types.ObjectId.isValid(bundleId)) {
       return res.status(400).json({ message: 'Invalid bundle ID' });
     }
 
-     // Find the existing bundle product
-     const bundleProduct = await BundleProduct.findById(bundleId) as IBundleProduct;
+    // Find the existing bundle product
+    const bundleProduct = (await BundleProduct.findById(
+      bundleId,
+    )) as IBundleProduct;
 
-     if (!bundleProduct) {
-       return res.status(404).json({ message: 'Bundle product not found' });
-     }
-     
+    if (!bundleProduct) {
+      return res.status(404).json({ message: 'Bundle product not found' });
+    }
+
     // Update the name if provided
     if (name) {
       bundleProduct.name = name;
@@ -43,15 +45,22 @@ export const updateBundle = async (req: Request, res: Response) => {
 
     // Update the discount percentage if provided and valid
     if (discountPercentage !== undefined) {
-      if (typeof discountPercentage !== 'number' || discountPercentage < 0 || discountPercentage > 100) {
-        return res.status(400).json({ message: 'Discount must be a number between 0 and 100' });
+      if (
+        typeof discountPercentage !== 'number' ||
+        discountPercentage < 0 ||
+        discountPercentage > 100
+      ) {
+        return res
+          .status(400)
+          .json({ message: 'Discount must be a number between 0 and 100' });
       }
 
       bundleProduct.discountPercentage = discountPercentage;
 
       // Calculate the discount price based on the updated discount percentage
       const totalOriginalPrice = bundleProduct.totalPrice ?? 0;
-      bundleProduct.discountPrice = totalOriginalPrice * (1 - discountPercentage / 100);
+      bundleProduct.discountPrice =
+        totalOriginalPrice * (1 - discountPercentage / 100);
     }
 
     // Save the updated bundle product
@@ -59,7 +68,6 @@ export const updateBundle = async (req: Request, res: Response) => {
 
     // Respond with a success message and the updated bundle product
     res.status(200).json({ message: 'Bundle product updated', bundleProduct });
-  
   } catch (err) {
     const error = err as Error;
     res.status(500).json({ message: error.message });

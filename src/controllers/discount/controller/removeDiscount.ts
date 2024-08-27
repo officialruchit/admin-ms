@@ -1,58 +1,52 @@
 import { Request, Response } from 'express';
-import { IProduct, Product } from '../../../model/product';
-import { IDiscount, discount } from '../../../model/discount';
 import mongoose from 'mongoose';
+import { discount as Discount } from '../../../model/discount';
 
-export const removeDiscount = async (req: Request, res: Response) => {
+export const removeProductFromDiscount = async (
+  req: Request,
+  res: Response,
+) => {
   try {
-    const productId = req.params.id;
-    const adminId = req.userId;
+    const { discountId } = req.params;
+    const { productId } = req.body;
 
-    // Check if adminId is present
-    if (!adminId) {
-      return res.status(403).json({ message: 'Unauthorized access' });
+    // Validate that discountId and productId are valid ObjectIds
+    if (!mongoose.Types.ObjectId.isValid(discountId)) {
+      return res.status(400).json({ message: 'Invalid discount ID.' });
     }
-
-    // Validate productId
     if (!mongoose.Types.ObjectId.isValid(productId)) {
-      return res.status(400).json({ message: 'Invalid product ID' });
+      return res.status(400).json({ message: 'Invalid product ID.' });
     }
 
-    // Check if the product exists
-    const product = (await Product.findById(productId)) as IProduct;
-    if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
+    // Check if the discount exists
+    const discount = await Discount.findById(discountId);
+    if (!discount) {
+      return res.status(404).json({ message: 'Discount not found.' });
     }
 
-    // If the product has no discount, return a message
-    if (!product.discount) {
+    // Check if the product is in the discount
+    if (!discount.productIds || !discount.productIds.includes(productId)) {
       return res
         .status(400)
-        .json({ message: 'No discount applied to this product' });
+        .json({ message: 'Product not found in discount.' });
     }
 
-    // Remove the discount from the product
-    const updatedProduct = await Product.findByIdAndUpdate(
-      productId,
-      {
-        discount: null, // Remove the discount
-        discountedPrice: product.price, // Reset discounted price to original price
-      },
-      { new: true },
-    )
-      .populate('discount')
-      .populate('category');
+    // Remove the product ID from the discount's productIds array
+    discount.productIds = discount.productIds.filter(
+      (id) => id.toString() !== productId,
+    );
 
-    if (!updatedProduct) {
-      return res.status(500).json({ message: 'Failed to remove discount' });
-    }
+    // Save the discount
+    await discount.save();
 
-    res.status(200).json({
-      message: 'Discount removed successfully',
-      product: updatedProduct,
-    });
+    res
+      .status(200)
+      .json({
+        message: 'Product removed from discount successfully.',
+        discount,
+      });
   } catch (err) {
     const error = err as Error;
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({ message: error.message });
   }
 };

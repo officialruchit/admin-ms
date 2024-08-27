@@ -1,82 +1,52 @@
 import { Request, Response } from 'express';
-import { discount, IDiscount } from '../../../model/discount';
-import { IProduct, Product } from '../../../model/product';
 import mongoose from 'mongoose';
+import { discount as Discount } from '../../../model/discount';
+import { Product } from '../../../model/product';
 
-export const applyDiscount = async (req: Request, res: Response) => {
+export const addProductToDiscount = async (req: Request, res: Response) => {
   try {
-    const productId = req.params.productId;
-    const discountId = req.params.discountId;
-    const adminId = req.userId;
+    const { discountId } = req.params;
+    const { productId } = req.body;
 
-    // Check if adminId is present
-    if (!adminId) {
-      return res.status(403).json({ message: 'Unauthorized access' });
+    // Validate that discountId and productId are valid ObjectIds
+    if (!mongoose.Types.ObjectId.isValid(discountId)) {
+      return res.status(400).json({ message: 'Invalid discount ID.' });
+    }
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({ message: 'Invalid product ID.' });
     }
 
-    // Validate productId and discountId
-    if (!productId || !discountId) {
+    // Check if the discount exists
+    const discount = await Discount.findById(discountId);
+    if (!discount) {
+      return res.status(404).json({ message: 'Discount not found.' });
+    }
+
+    // Check if the product exists
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found.' });
+    }
+
+    // Check if the product is already added to the discount
+    if (discount.productIds && discount.productIds.includes(productId)) {
       return res
         .status(400)
-        .json({ message: 'Missing productId or discountId' });
+        .json({ message: 'Product already added to discount.' });
     }
 
-    // Check if discount exists
-    const discountAvailability = (await discount.findById(
-      discountId,
-    )) as IDiscount;
-    if (!discountAvailability) {
-      return res.status(404).json({ message: 'Discount not found' });
-    }
+    // Add the product ID to the discount's productIds array
+    discount.productIds = discount.productIds || [];
+    discount.productIds.push(productId);
 
-    // Check if product exists
-    const productAvailability = (await Product.findById(productId)) as IProduct;
-    if (!productAvailability) {
-      return res.status(404).json({ message: 'Product not found' });
-    }
+    // Save the discount
+    await discount.save();
 
-    // Determine the final discount percentage
-    let finalDiscountPercentage = discountAvailability.percentage;
-
-    if (productAvailability.discount) {
-      const existingDiscount = await discount.findById(
-        productAvailability.discount.toString(),
-      );
-      if (
-        existingDiscount &&
-        existingDiscount.percentage > finalDiscountPercentage
-      ) {
-        finalDiscountPercentage = existingDiscount.percentage;
-      }
-    }
-
-    // Calculate the discounted price
-    const originalPrice = productAvailability.price;
-    const discountedPrice =
-      originalPrice - (originalPrice * finalDiscountPercentage) / 100;
-
-    // Update the product with the new discount
-    const updatedProduct = await Product.findByIdAndUpdate(
-      productId,
-      {
-        discount: new mongoose.Types.ObjectId(discountId), // Ensure ObjectId type
-        discountedPrice: discountedPrice,
-      },
-      { new: true },
-    )
-      .populate('discount')
-      .populate('category');
-
-    if (!updatedProduct) {
-      return res.status(500).json({ message: 'Failed to apply discount' });
-    }
-
-    res.status(200).json({
-      message: 'Discount applied successfully',
-      product: updatedProduct,
-    });
+    res
+      .status(200)
+      .json({ message: 'Product added to discount successfully.', discount });
   } catch (err) {
     const error = err as Error;
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({ message: error.message });
   }
 };

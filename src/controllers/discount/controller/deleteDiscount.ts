@@ -4,7 +4,6 @@ import { discount } from '../../../model/discount';
 export const deleteDiscount = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    console.log(id);
     const discounts = await discount.findByIdAndDelete(id);
     if (!discounts) {
       return res.status(404).json({ message: 'Discount not found' });

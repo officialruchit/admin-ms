@@ -41,8 +41,13 @@ export const removeProductFromBundle = async (req: Request, res: Response) => {
     // Remove the product from the bundle
     bundle.products.splice(productIndex, 1);
 
-    const productsData: IProduct[] = await Product.find({ _id: { $in: bundle.products } });
-    const totalOriginalPrice = productsData.reduce((total, product) => total + product.price, 0);
+    const productsData: IProduct[] = await Product.find({
+      _id: { $in: bundle.products },
+    });
+    const totalOriginalPrice = productsData.reduce(
+      (total, product) => total + product.price,
+      0,
+    );
 
     bundle.totalPrice = totalOriginalPrice;
 

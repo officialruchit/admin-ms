@@ -4,7 +4,14 @@ import { parse, isAfter, isValid } from 'date-fns';
 
 export const createDiscount = async (req: Request, res: Response) => {
   try {
-    const { percentage, description, validFrom, validTo } = req.body;
+    const {
+      percentage,
+      description,
+      validFrom,
+      validTo,
+      productIds,
+      bundleIds,
+    } = req.body;
     const adminId = req.userId;
 
     // Check if the seller ID is present
@@ -68,6 +75,8 @@ export const createDiscount = async (req: Request, res: Response) => {
       validFrom: fromDate,
       validTo: toDate,
       adminId,
+      productIds: productIds || [],
+      bundleIds: bundleIds || [],
     });
 
     const data = await newDiscount.save();

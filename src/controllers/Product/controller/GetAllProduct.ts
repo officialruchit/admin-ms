@@ -17,14 +17,16 @@ export const getAllProducts = async (req: Request, res: Response) => {
     const filetr = searching ? { name: new RegExp(searching, 'i') } : {};
     const totalDocs = await Product.countDocuments(filetr);
     const totalPages = Math.ceil(totalDocs / limitNumber);
-    const products = await Product.find(filetr).populate({
-      path: 'discount',
-      select: 'percentage description validFrom validTo -_id',
-    })
-    .populate({
-      path: 'category',
-      select: 'name description -_id',
-    }).limit(limitNumber);
+    const products = await Product.find(filetr)
+      .populate({
+        path: 'discount',
+        select: 'percentage description validFrom validTo -_id',
+      })
+      .populate({
+        path: 'category',
+        select: 'name description -_id',
+      })
+      .limit(limitNumber);
     res
       .status(200)
       .json({ totalDocs, totalPages, PageNumber, limitNumber, products });
