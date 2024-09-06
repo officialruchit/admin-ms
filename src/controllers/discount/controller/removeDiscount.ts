@@ -39,12 +39,10 @@ export const removeProductFromDiscount = async (
     // Save the discount
     await discount.save();
 
-    res
-      .status(200)
-      .json({
-        message: 'Product removed from discount successfully.',
-        discount,
-      });
+    res.status(200).json({
+      message: 'Product removed from discount successfully.',
+      discount,
+    });
   } catch (err) {
     const error = err as Error;
     res.status(500).json({ message: error.message });

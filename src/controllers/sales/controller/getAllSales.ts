@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { Sales } from '../../../model/sales';
+import ProductCategory from '../../../model/ProductCategory';
 
 export const getAllSales = async (req: Request, res: Response) => {
   try {
@@ -18,7 +19,15 @@ export const getAllSales = async (req: Request, res: Response) => {
 
     // Fetch sales with filters, pagination, and population
     const sales = await Sales.find(filter)
-      .populate('items.itemId')
+      .populate({
+        path: 'items.itemId',
+        select: 'name description price', // Select specific fields from itemId
+        populate: {
+          path: 'category',
+          model: ProductCategory, // Ensure the correct model is referenced
+          select: 'name description', // Select specific fields from category
+        },
+      })
       .skip(skip)
       .limit(limitNumber);
 

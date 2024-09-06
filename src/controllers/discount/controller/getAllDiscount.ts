@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { discount } from '../../../model/discount';
-
+import ProductCategory from '../../../model/ProductCategory';
 export const getAllDiscounts = async (req: Request, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
@@ -9,7 +9,17 @@ export const getAllDiscounts = async (req: Request, res: Response) => {
     const search = (req.query.search as string) || '';
     const query = search ? { percentage: new RegExp(search, 'i') } : {};
     const totalDiscounts = await discount.countDocuments(query);
-    const discounts = await discount.find(query).skip(skip).limit(limit);
+    const discounts = await discount
+      .find(query)
+      .populate({
+        path: 'productIds',
+        populate: {
+          path: 'category', // Populating the category field in each product
+          model: 'ProductCategory', // Assuming your category model is named 'Category'
+        },
+      })
+      .skip(skip)
+      .limit(limit);
     res.status(200).json({
       currentPage: page,
       totalPages: Math.ceil(totalDiscounts / limit),

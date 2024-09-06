@@ -17,11 +17,9 @@ export const addProductToSale = async (req: Request, res: Response) => {
 
     // Validate itemType
     if (!['Product', 'Bundle'].includes(itemType)) {
-      return res
-        .status(400)
-        .json({
-          message: 'Invalid item type. Must be either "Product" or "Bundle".',
-        });
+      return res.status(400).json({
+        message: 'Invalid item type. Must be either "Product" or "Bundle".',
+      });
     }
 
     // Find the sale by ID

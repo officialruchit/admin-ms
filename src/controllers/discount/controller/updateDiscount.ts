@@ -48,11 +48,9 @@ export const updateDiscount = async (req: Request, res: Response) => {
     if (validFrom) {
       fromDate = parse(validFrom, 'dd/MM/yyyy', new Date());
       if (!isValid(fromDate)) {
-        return res
-          .status(400)
-          .json({
-            message: 'Invalid "validFrom" date format; use dd/MM/yyyy.',
-          });
+        return res.status(400).json({
+          message: 'Invalid "validFrom" date format; use dd/MM/yyyy.',
+        });
       }
     }
 
@@ -90,12 +88,10 @@ export const updateDiscount = async (req: Request, res: Response) => {
 
     // Save the updated discount to the database
     const updatedDiscount = await existingDiscount.save();
-    res
-      .status(200)
-      .json({
-        message: 'Discount updated successfully.',
-        data: updatedDiscount,
-      });
+    res.status(200).json({
+      message: 'Discount updated successfully.',
+      data: updatedDiscount,
+    });
   } catch (err) {
     const error = err as Error;
     res.status(500).json({ message: error.message });
