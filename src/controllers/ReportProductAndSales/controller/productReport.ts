@@ -1,8 +1,6 @@
-// src/controllers/productReportController.ts
-
 import { Request, Response } from 'express';
 import { Order } from '../../../model/order';
-import { Product } from '../../../model/product';
+
 
 export const topSellingProducts = async (req: Request, res: Response) => {
   const { period } = req.params;
@@ -33,62 +31,57 @@ export const topSellingProducts = async (req: Request, res: Response) => {
     }
 
     // Generate report for top-selling products using aggregation
-    const topProducts = await Order.aggregate(
-      groupByTopProducts({ start, end }),
-    );
+    const topProducts = await Order.aggregate([
+      {
+        $match: {
+          status: 'delivered', // Only consider delivered orders
+          createdAt: { $gte: start, $lt: end },
+        },
+      },
+      {
+        $unwind: '$orderItems', // Unwind orderItems array to aggregate each item
+      },
+      {
+        $group: {
+          _id: '$orderItems.itemId', // Group by productId (orderItems.itemId)
+          totalQuantitySold: { $sum: '$orderItems.quantity' }, // Sum total quantity sold per product
+          totalRevenue: {
+            $sum: { $multiply: ['$orderItems.quantity', '$orderItems.price'] },
+          }, // Calculate total revenue
+        },
+      },
+      {
+        $lookup: {
+          from: 'products', // Reference the product collection
+          localField: '_id', // Match productId with _id from product collection
+          foreignField: '_id',
+          as: 'productDetails',
+        },
+      },
+      {
+        $unwind: '$productDetails', // Unwind the product details array
+      },
+      {
+        $project: {
+          _id: 0,
+          productId: '$_id',
+          name: '$productDetails.name',
+          totalQuantitySold: 1,
+          totalRevenue: 1,
+          price: '$productDetails.price',
+        },
+      },
+      {
+        $sort: { totalQuantitySold: -1 }, // Sort by totalQuantitySold in descending order
+      },
+      {
+        $limit: 10, // Limit to top 10 selling products
+      },
+    ]);
 
     res.status(200).json(topProducts); // Send response with top-selling products report
-  } catch (error: any) {
-    res.status(500).json({ message: error.message });
+  } catch (error) {
+    const err= error as Error
+    res.status(500).json({ message: err.message });
   }
-};
-
-const groupByTopProducts = (timePeriod: any) => {
-  return [
-    {
-      $match: {
-        status: 'delivered', // Only consider delivered orders
-        createdAt: { $gte: timePeriod.start, $lt: timePeriod.end },
-      },
-    },
-    {
-      $unwind: '$orderItems', // Unwind orderItems array to aggregate each item
-    },
-    {
-      $group: {
-        _id: '$orderItems.itemId', // Group by productId (orderItems.itemId)
-        totalQuantitySold: { $sum: '$orderItems.quantity' }, // Sum total quantity sold per product
-        totalRevenue: {
-          $sum: { $multiply: ['$orderItems.quantity', '$orderItems.price'] },
-        }, // Calculate total revenue
-      },
-    },
-    {
-      $lookup: {
-        from: 'products', // Reference the product collection
-        localField: '_id', // Match productId with _id from product collection
-        foreignField: '_id',
-        as: 'productDetails',
-      },
-    },
-    {
-      $unwind: '$productDetails', // Unwind the product details array
-    },
-    {
-      $project: {
-        _id: 0,
-        productId: '$_id',
-        name: '$productDetails.name',
-        totalQuantitySold: 1,
-        totalRevenue: 1,
-        price: '$productDetails.price',
-      },
-    },
-    {
-      $sort: { totalQuantitySold: -1 }, // Sort by totalQuantitySold in descending order
-    },
-    {
-      $limit: 10, // Limit to top 10 selling products
-    },
-  ];
 };

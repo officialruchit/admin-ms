@@ -1,5 +1,3 @@
-// src/controllers/reportController.ts
-
 import { Request, Response } from 'express';
 import { Order } from '../../../model/order';
 
@@ -32,37 +30,34 @@ export const salesReport = async (req: Request, res: Response) => {
     }
 
     // Generate sales report using aggregation
-    const salesReport = await Order.aggregate(groupBySales({ start, end }));
+    const salesReport = await Order.aggregate([
+      {
+        $match: {
+          status: 'delivered', // Only consider delivered orders
+          createdAt: { $gte: start, $lt: end },
+        },
+      },
+      {
+        $group: {
+          _id: null, // Group all orders together
+          totalSales: { $sum: '$totalAmount' }, // Sum of all sales amounts
+          totalOrders: { $sum: 1 }, // Count total number of orders
+          totalProductsSold: { $sum: { $sum: '$items.quantity' } }, // Sum quantity of all items sold
+        },
+      },
+      {
+        $project: {
+          _id: 0, // Exclude _id
+          totalSales: 1,
+          totalOrders: 1,
+          totalProductsSold: 1,
+        },
+      },
+    ]);
 
     res.status(200).json(salesReport); // Send response with sales report
-  } catch (error: any) {
-    res.status(500).json({ message: error.message });
+  } catch (error) {
+    const err= error as Error
+    res.status(500).json({ message: err.message });
   }
-};
-
-const groupBySales = (timePeriod: any) => {
-  return [
-    {
-      $match: {
-        status: 'delivered', // Only consider delivered orders
-        createdAt: { $gte: timePeriod.start, $lt: timePeriod.end },
-      },
-    },
-    {
-      $group: {
-        _id: null, // Group all orders
-        totalSales: { $sum: '$totalAmount' }, // Sum total sales
-        totalOrders: { $sum: 1 }, // Count total number of orders
-        totalProductsSold: { $sum: { $sum: '$items.quantity' } }, // Sum quantity of all items sold
-      },
-    },
-    {
-      $project: {
-        _id: 0,
-        totalSales: 1,
-        totalOrders: 1,
-        totalProductsSold: 1,
-      },
-    },
-  ];
 };

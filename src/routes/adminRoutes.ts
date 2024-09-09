@@ -10,7 +10,7 @@ import userRoutes from '../controllers/user/routes/userRoutes';
 import { signin } from '../controllers/signin';
 import { signup } from '../controllers/signup';
 import SalesRoutes from '../controllers/sales/routes/salesRoutes';
-
+import Report from '../controllers/ReportProductAndSales/routes/routes';
 router.post('/signup', signup);
 router.post('/login', signin);
 router.use('/', bundleRoutes);
@@ -20,5 +20,6 @@ router.use('/', productRoutes);
 router.use('/', reportRoutes);
 router.use('/', userRoutes);
 router.use('/', SalesRoutes);
+router.use('/',Report)
 
 export default router;
